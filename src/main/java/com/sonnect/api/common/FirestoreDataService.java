@@ -179,10 +179,16 @@ public class FirestoreDataService {
     }
 
     public List<MessageView> messagesFor(String uid, String chatId) {
+        return messagesAfter(uid, chatId, null);
+    }
+
+    public List<MessageView> messagesAfter(String uid, String chatId, Instant after) {
         requireMember(uid, chatId);
-        QuerySnapshot snapshot = await(firestore.collection(CHATS).document(chatId)
-                .collection("messages").orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(100).get());
+        Query query = firestore.collection(CHATS).document(chatId)
+                .collection("messages").orderBy("createdAt", Query.Direction.DESCENDING);
+        if (after != null) query = query.whereGreaterThan("createdAt", Timestamp.ofTimeSecondsAndNanos(
+                after.getEpochSecond(), after.getNano()));
+        QuerySnapshot snapshot = await(query.limit(100).get());
         return snapshot.getDocuments().stream()
                 .map(doc -> message(chatId, doc))
                 .sorted(Comparator.comparing(MessageView::createdAt))

@@ -4,6 +4,7 @@ import com.sonnect.api.common.FirestoreDataService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.time.Instant;
 
 @Service
 public class ChatService {
@@ -21,6 +22,10 @@ public class ChatService {
 
     public List<FirestoreDataService.MessageView> messagesFor(String uid, String chatId) {
         return firestore.messagesFor(uid, chatId);
+    }
+
+    public List<FirestoreDataService.MessageView> messagesFor(String uid, String chatId, Instant after) {
+        return firestore.messagesAfter(uid, chatId, after);
     }
 
     public FirestoreDataService.MessageView send(String uid, String chatId, String text) {
